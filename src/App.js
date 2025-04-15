@@ -1,23 +1,39 @@
-import logo from './logo.svg';
-import './App.css';
+import React, { useState } from "react";
+import Register from "./Components/Register";
+import Login from "./Components/Login";
+import Logout from "./Components/Logout";
+import CreatePost from "./Components/CreatePost"; //
 
 function App() {
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [username, setUsername] = useState("");
+
+  const handleLogin = (email) => {
+    setIsLoggedIn(true);
+    setUsername(email);
+  };
+
+  const handleLogout = () => {
+    setIsLoggedIn(false);
+    setUsername("");
+  };
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div style={{ textAlign: "center", marginTop: "40px" }}>
+      <h1>{isLoggedIn ? `Dashboard` : `Welcome Guest!`}</h1>
+
+      {isLoggedIn ? (
+        <>
+          <Logout username={username} onLogout={handleLogout} />
+          <CreatePost />
+        </>
+      ) : (
+        <>
+          <Register />
+          <hr style={{ margin: "40px" }} />
+          <Login onLogin={handleLogin} />
+        </>
+      )}
     </div>
   );
 }
