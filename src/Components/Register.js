@@ -1,101 +1,98 @@
-import React, { useState } from "react";
+import React, {useState} from 'react';
+import axios from 'axios';
 
-const Register = () => {
-  const [formData, setFormData] = useState({
-    username: "",
-    email: "",
-    password: ""
-  });
+function Register() {
+    const [form, setForm] = useState({username: '', password: '', email: ''});
 
-  const [message, setMessage] = useState("");
+    const handleChange = e => {
+        setForm({...form, [e.target.name]: e.target.value});
+    };
 
-  const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value
-    });
-  };
+    const handleSubmit = async e => {
+        e.preventDefault();
+        try {
+            const res = await axios.post("https://assignment2-backend-nine.vercel.app/api/register/", form);
+            alert('Registered successfully!');
+        } catch (error) {
+            console.error(error);
+            alert('Registration failed');
+        }
+    };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
+    // Inline styles
+    const containerStyle = {
+        maxWidth: '400px',
+        margin: '0 auto',
+        padding: '20px',
+        backgroundColor: '#f9f9f9',
+        borderRadius: '8px',
+        boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
+    };
 
-    const { username, email, password } = formData;
+    const headingStyle = {
+        textAlign: 'center',
+        color: '#333',
+    };
 
-    if (username && email && password) {
-      console.log("User Registered:", formData);
-      setMessage("User registered successfully!");
-      setFormData({ username: "", email: "", password: "" });
-    } else {
-      setMessage("Please fill all fields.");
-    }
-  };
+    const inputStyle = {
+        width: '100%',
+        padding: '10px',
+        margin: '10px 0',
+        border: '1px solid #ccc',
+        borderRadius: '4px',
+        fontSize: '16px',
+    };
 
-  return (
-    <div style={styles.container}>
-      <h2>Sign Up</h2>
-      <form onSubmit={handleSubmit} style={styles.form}>
-        <input
-          type="text"
-          name="username"
-          placeholder="Username"
-          value={formData.username}
-          onChange={handleChange}
-          style={styles.input}
-        />
-        <input
-          type="email"
-          name="email"
-          placeholder="Email"
-          value={formData.email}
-          onChange={handleChange}
-          style={styles.input}
-        />
-        <input
-          type="password"
-          name="password"
-          placeholder="Password"
-          value={formData.password}
-          onChange={handleChange}
-          style={styles.input}
-        />
-        <button type="submit" style={styles.button}>Register</button>
-      </form>
-      {message && <p style={styles.message}>{message}</p>}
-    </div>
-  );
-};
+    const buttonStyle = {
+        width: '100%',
+        padding: '12px',
+        backgroundColor: '#4CAF50',
+        color: 'white',
+        border: 'none',
+        borderRadius: '4px',
+        fontSize: '16px',
+        cursor: 'pointer',
+        transition: 'background-color 0.3s',
+    };
 
-const styles = {
-  container: {
-    width: "300px",
-    margin: "50px auto",
-    padding: "20px",
-    borderRadius: "8px",
-    backgroundColor: "#f8f9fa",
-    boxShadow: "0 4px 8px rgba(0,0,0,0.1)"
-  },
-  form: {
-    display: "flex",
-    flexDirection: "column"
-  },
-  input: {
-    padding: "10px",
-    margin: "10px 0",
-    borderRadius: "4px",
-    border: "1px solid #ccc"
-  },
-  button: {
-    padding: "10px",
-    backgroundColor: "#007bff",
-    color: "#fff",
-    border: "none",
-    borderRadius: "4px",
-    cursor: "pointer"
-  },
-  message: {
-    marginTop: "10px",
-    color: "green"
-  }
-};
+    const buttonHoverStyle = {
+        backgroundColor: '#45a049',
+    };
+
+    return (
+        <div style={containerStyle}>
+            <h1 style={headingStyle}>Register</h1>
+            <form onSubmit={handleSubmit}>
+                <input
+                    name="username"
+                    placeholder="Username"
+                    onChange={handleChange}
+                    style={inputStyle}
+                />
+                <input
+                    name="email"
+                    placeholder="Email"
+                    onChange={handleChange}
+                    style={inputStyle}
+                />
+                <input
+                    name="password"
+                    placeholder="Password"
+                    type="password"
+                    onChange={handleChange}
+                    style={inputStyle}
+                />
+                <button
+                    type="submit"
+                    style={buttonStyle}
+                    onMouseOver={e => e.target.style.backgroundColor = buttonHoverStyle.backgroundColor}
+                    onMouseOut={e => e.target.style.backgroundColor = buttonStyle.backgroundColor}
+                >
+                    Register
+                </button>
+            </form>
+        </div>
+    );
+}
 
 export default Register;
