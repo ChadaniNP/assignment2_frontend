@@ -1,93 +1,93 @@
-import React, { useState } from "react";
+import React, {useState} from 'react';
+import axios from 'axios';
 
-const Login = () => {
-  const [credentials, setCredentials] = useState({
-    email: "",
-    password: ""
-  });
+function Login() {
+    const [form, setForm] = useState({username: '', password: ''});
 
-  const [message, setMessage] = useState("");
+    const handleChange = e => {
+        setForm({...form, [e.target.name]: e.target.value});
+    };
 
-  const handleChange = (e) => {
-    setCredentials({
-      ...credentials,
-      [e.target.name]: e.target.value
-    });
-  };
+    const handleSubmit = async e => {
+        e.preventDefault();
+        try {
+            const res = await axios.post('https://assignment2-backend-nine.vercel.app/api/login/', form);
+            localStorage.setItem('token', res.data.token);  // Save token
+            alert('Login successful!');
+        } catch (error) {
+            console.error(error);
+            alert('Login failed');
+        }
+    };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
+    // Inline styles
+    const containerStyle = {
+        maxWidth: '400px',
+        margin: '50px auto',
+        padding: '20px',
+        backgroundColor: '#f9f9f9',
+        borderRadius: '8px',
+        boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
+    };
 
-    const { email, password } = credentials;
+    const headingStyle = {
+        textAlign: 'center',
+        color: '#333',
+    };
 
-    if (email && password) {
-      // Simulate login
-      console.log("Logged in with:", credentials);
-      setMessage("Login successful!");
-      setCredentials({ email: "", password: "" });
-    } else {
-      setMessage("Please enter email and password.");
-    }
-  };
+    const inputStyle = {
+        width: '100%',
+        padding: '10px',
+        margin: '10px 0',
+        border: '1px solid #ccc',
+        borderRadius: '4px',
+        fontSize: '16px',
+    };
 
-  return (
-    <div style={styles.container}>
-      <h2>Login</h2>
-      <form onSubmit={handleSubmit} style={styles.form}>
-        <input
-          type="email"
-          name="email"
-          placeholder="Email"
-          value={credentials.email}
-          onChange={handleChange}
-          style={styles.input}
-        />
-        <input
-          type="password"
-          name="password"
-          placeholder="Password"
-          value={credentials.password}
-          onChange={handleChange}
-          style={styles.input}
-        />
-        <button type="submit" style={styles.button}>Login</button>
-      </form>
-      {message && <p style={styles.message}>{message}</p>}
-    </div>
-  );
-};
+    const buttonStyle = {
+        width: '100%',
+        padding: '12px',
+        backgroundColor: '#4CAF50',
+        color: 'white',
+        border: 'none',
+        borderRadius: '4px',
+        fontSize: '16px',
+        cursor: 'pointer',
+        transition: 'background-color 0.3s',
+    };
 
-const styles = {
-  container: {
-    width: "300px",
-    margin: "50px auto",
-    padding: "20px",
-    borderRadius: "8px",
-    backgroundColor: "#f8f9fa",
-    boxShadow: "0 4px 8px rgba(0,0,0,0.1)"
-  },
-  form: {
-    display: "flex",
-    flexDirection: "column"
-  },
-  input: {
-    padding: "10px",
-    margin: "10px 0",
-    borderRadius: "4px",
-    border: "1px solid #ccc"
-  },
-  button: {
-    padding: "10px",
-    backgroundColor: "#28a745",
-    color: "#fff",
-    border: "none",
-    borderRadius: "4px",
-    cursor: "pointer"
-  },
-  message: {
-    marginTop: "10px",
-    color: "green"
-  }
-};
+    const buttonHoverStyle = {
+        backgroundColor: '#45a049',
+    };
+
+    return (
+        <div style={containerStyle}>
+            <h1 style={headingStyle}>Login</h1>
+            <form onSubmit={handleSubmit}>
+                <input
+                    name="username"
+                    placeholder="Username"
+                    onChange={handleChange}
+                    style={inputStyle}
+                />
+                <input
+                    name="password"
+                    placeholder="Password"
+                    type="password"
+                    onChange={handleChange}
+                    style={inputStyle}
+                />
+                <button
+                    type="submit"
+                    style={buttonStyle}
+                    onMouseOver={e => e.target.style.backgroundColor = buttonHoverStyle.backgroundColor}
+                    onMouseOut={e => e.target.style.backgroundColor = buttonStyle.backgroundColor}
+                >
+                    Login
+                </button>
+            </form>
+        </div>
+    );
+}
 
 export default Login;
