@@ -1,41 +1,56 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
 function CreateBlog() {
     const [form, setForm] = useState({ title: '', content: '' });
     const [error, setError] = useState(null);
+    const [blogs, setBlogs] = useState([]);
+
+    const token = localStorage.getItem('token');
 
     const handleChange = (e) => {
         setForm({ ...form, [e.target.name]: e.target.value });
     };
 
+    const fetchBlogs = async () => {
+        try {
+            const res = await axios.get('https://assignment2-backend-nine.vercel.app/api/blogs/');
+            setBlogs(res.data);
+        } catch (error) {
+            console.error('Error fetching blogs:', error);
+        }
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        const token = localStorage.getItem('token');  // Get token from localStorage
-
-        // Check if token exists before making the request
         if (!token) {
             setError("You need to be logged in to create a blog.");
             return;
         }
 
         try {
-            const res = await axios.post(
+            await axios.post(
                 'https://assignment2-backend-nine.vercel.app/api/create/',
                 form,
                 {
                     headers: {
-                        'Authorization': `Bearer ${token}`  // Add token to Authorization header
+                        'Authorization': `Token ${token}`
                     }
                 }
             );
             alert('Blog created successfully!');
+            setForm({ title: '', content: '' });
+            fetchBlogs(); // refresh the blog list
         } catch (error) {
             console.error('Error creating blog:', error);
             setError('Error creating blog');
         }
     };
+
+    useEffect(() => {
+        fetchBlogs(); // load blogs on page load
+    }, []);
 
     return (
         <div style={{ maxWidth: '600px', margin: '0 auto', textAlign: 'center', padding: '20px' }}>
@@ -46,33 +61,31 @@ function CreateBlog() {
                     placeholder="Title"
                     value={form.title}
                     onChange={handleChange}
-                    style={{ width: '100%', padding: '10px', margin: '10px 0', border: '1px solid #ccc', borderRadius: '4px' }}
+                    style={{ width: '100%', padding: '10px', margin: '10px 0' }}
                 />
                 <textarea
                     name="content"
                     placeholder="Content"
                     value={form.content}
                     onChange={handleChange}
-                    style={{ width: '100%', padding: '10px', margin: '10px 0', border: '1px solid #ccc', borderRadius: '4px' }}
+                    style={{ width: '100%', padding: '10px', margin: '10px 0' }}
                 />
-                <button
-                    type="submit"
-                    style={{
-                        width: '100%',
-                        padding: '12px',
-                        backgroundColor: '#4CAF50',
-                        color: 'white',
-                        border: 'none',
-                        borderRadius: '4px',
-                        fontSize: '16px',
-                        cursor: 'pointer',
-                    }}
-                >
-                    Create Blog
-                </button>
+                <button type="submit">Create Blog</button>
             </form>
 
-            {error && <p style={{ color: 'red' }}>{error}</p>}  {/* Display error if any */}
+            {error && <p style={{ color: 'red' }}>{error}</p>}
+
+            <h2>All Blogs</h2>
+            {blogs.length > 0 ? (
+                blogs.map((blog) => (
+                    <div key={blog.id} style={{ border: '1px solid #ccc', margin: '10px 0', padding: '10px' }}>
+                        <h3>{blog.title}</h3>
+                        <p>{blog.content}</p>
+                    </div>
+                ))
+            ) : (
+                <p>No blogs yet.</p>
+            )}
         </div>
     );
 }
