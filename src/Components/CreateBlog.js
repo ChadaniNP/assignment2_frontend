@@ -1,15 +1,15 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import Like from './Like';
 
 function CreateBlog() {
   const [form, setForm] = useState({ title: '', content: '' });
   const [error, setError] = useState(null);
   const [blogs, setBlogs] = useState([]);
-  const token = localStorage.getItem('token');
   const navigate = useNavigate();
 
-  console.log("Token at startup:", token);
+  const token = localStorage.getItem('token');
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -22,12 +22,9 @@ function CreateBlog() {
     }
 
     try {
-      const res = await axios.get('http://localhost:8000/api/blogs/', {
-        headers: {
-          'Authorization': `Token ${token}`
-        }
+      const res = await axios.get('https://assignment2-backend-nine.vercel.app/api/blogs/', {
+        headers: { Authorization: `Token ${token}` },
       });
-      console.log('Fetched blogs:', res.data);
       setBlogs(res.data);
     } catch (error) {
       console.error('Error fetching blogs:', error);
@@ -45,17 +42,15 @@ function CreateBlog() {
 
     try {
       await axios.post(
-        'http://localhost:8000/api/create/',
+        'https://assignment2-backend-nine.vercel.app/api/create/',
         form,
         {
-          headers: {
-            'Authorization': `Token ${token}`
-          }
+          headers: { Authorization: `Token ${token}` },
         }
       );
       alert('Blog created successfully!');
       setForm({ title: '', content: '' });
-      fetchBlogs(); // refresh the blog list
+      fetchBlogs();
     } catch (error) {
       console.error('Error creating blog:', error);
       setError('Error creating blog');
@@ -68,17 +63,13 @@ function CreateBlog() {
       return;
     }
 
-    console.log(`Deleting blog with ID: ${id}`);
-    const deleteUrl = `http://localhost:8000/api/blogs/${id}/delete/`;
-    console.log(`Delete URL: ${deleteUrl}`);
-
     try {
-      const response = await axios.delete(deleteUrl, {
-        headers: {
-          'Authorization': `Token ${token}`
+      await axios.delete(
+        `https://assignment2-backend-nine.vercel.app/api/blogs/${id}/delete/`,
+        {
+          headers: { Authorization: `Token ${token}` },
         }
-      });
-      console.log('Delete Response:', response);
+      );
       alert('Blog deleted successfully!');
       fetchBlogs();
     } catch (error) {
@@ -116,27 +107,48 @@ function CreateBlog() {
 
       <h2>All Blogs</h2>
       {blogs.length > 0 ? (
-        blogs.map((blog) => {
-          console.log(`Blog ID: ${blog.id}`);
-          return (
-            <div key={blog.id} style={{ border: '1px solid #ccc', margin: '10px 0', padding: '10px' }}>
-              <h3>{blog.title}</h3>
-              <p>{blog.content}</p>
-              <button
-                onClick={() => navigate(`/edit/${blog.id}`)}
-                style={{ marginRight: '10px', backgroundColor: '#007BFF', color: 'white', padding: '5px 10px' }}
-              >
-                Edit
-              </button>
-              <button
-                onClick={() => handleDelete(blog.id)}
-                style={{ backgroundColor: 'red', color: 'white', padding: '5px 10px' }}
-              >
-                Delete
-              </button>
-            </div>
-          );
-        })
+        blogs.map((blog) => (
+          <div
+            key={blog.id}
+            style={{
+              border: '1px solid #ccc',
+              margin: '10px 0',
+              padding: '10px',
+              textAlign: 'left',
+              position: 'relative',
+            }}
+          >
+            <h3>{blog.title}</h3>
+            <p>{blog.content}</p>
+
+            <Like blogId={blog.id} />
+
+            <button
+              onClick={() => navigate(`/edit/${blog.id}`)}
+              style={{
+                backgroundColor: 'blue',
+                color: 'white',
+                padding: '5px 10px',
+                marginTop: '10px',
+                marginRight: '10px',
+              }}
+            >
+              Edit
+            </button>
+
+            <button
+              onClick={() => handleDelete(blog.id)}
+              style={{
+                backgroundColor: 'red',
+                color: 'white',
+                padding: '5px 10px',
+                marginTop: '10px',
+              }}
+            >
+              Delete
+            </button>
+          </div>
+        ))
       ) : (
         <p>No blogs yet.</p>
       )}
