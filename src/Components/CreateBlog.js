@@ -20,7 +20,7 @@ function CreateBlog() {
     }
 
     try {
-        const res = await axios.get('http://localhost:8000/api/blogs/', {
+        const res = await axios.get('https://assignment2-backend-nine.vercel.app/api/blogs/', {
             headers: {
                 'Authorization': `Token ${token}`
             }
@@ -44,7 +44,7 @@ function CreateBlog() {
 
         try {
             await axios.post(
-                'http://localhost:8000/api/create/',
+                'https://assignment2-backend-nine.vercel.app/api/create/',
                 form,
                 {
                     headers: {
@@ -68,9 +68,8 @@ function CreateBlog() {
     }
 
     console.log(`Deleting blog with ID: ${id}`);  // Log the ID
-    const deleteUrl = `http://localhost:8000/api/blogs/${id}/delete/`;  // Log the URL as well
+    const deleteUrl = `https://assignment2-backend-nine.vercel.app/api/blogs/${id}/delete/`;  // Log the URL as well
     console.log(`Delete URL: ${deleteUrl}`);
-
     try {
         const response = await axios.delete(deleteUrl, {
             headers: {
