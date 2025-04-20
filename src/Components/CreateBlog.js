@@ -1,38 +1,146 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 
 function CreateBlog() {
-  const [blog, setBlog] = useState({ title: '', content: '' });
+  const [form, setForm] = useState({ title: '', content: '' });
+  const [error, setError] = useState(null);
+  const [blogs, setBlogs] = useState([]);
+  const token = localStorage.getItem('token');
+  const navigate = useNavigate();
 
-  const handleChange = e => {
-    setBlog({ ...blog, [e.target.name]: e.target.value });
+  console.log("Token at startup:", token);
+
+  const handleChange = (e) => {
+    setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = async e => {
-    e.preventDefault();
+  const fetchBlogs = useCallback(async () => {
+    if (!token) {
+      setError("You need to be logged in to view blogs.");
+      return;
+    }
+
     try {
-      const res = await axios.post(
-        'https://assignment2-backend-nine.vercel.app/',
-        blog,
+      const res = await axios.get('http://localhost:8000/api/blogs/', {
+        headers: {
+          'Authorization': `Token ${token}`
+        }
+      });
+      console.log('Fetched blogs:', res.data);
+      setBlogs(res.data);
+    } catch (error) {
+      console.error('Error fetching blogs:', error);
+      setError('Error fetching blogs');
+    }
+  }, [token]);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    if (!token) {
+      setError("You need to be logged in to create a blog.");
+      return;
+    }
+
+    try {
+      await axios.post(
+        'http://localhost:8000/api/create/',
+        form,
         {
           headers: {
-            Authorization: `Token ${localStorage.getItem('token')}`,
+            'Authorization': `Token ${token}`
           }
         }
       );
-      alert('Blog created!');
+      alert('Blog created successfully!');
+      setForm({ title: '', content: '' });
+      fetchBlogs(); // refresh the blog list
     } catch (error) {
-      console.error(error);
-      alert('Failed to create blog');
+      console.error('Error creating blog:', error);
+      setError('Error creating blog');
     }
   };
 
+  const handleDelete = async (id) => {
+    if (!token) {
+      setError("You need to be logged in to delete a blog.");
+      return;
+    }
+
+    console.log(`Deleting blog with ID: ${id}`);
+    const deleteUrl = `http://localhost:8000/api/blogs/${id}/delete/`;
+    console.log(`Delete URL: ${deleteUrl}`);
+
+    try {
+      const response = await axios.delete(deleteUrl, {
+        headers: {
+          'Authorization': `Token ${token}`
+        }
+      });
+      console.log('Delete Response:', response);
+      alert('Blog deleted successfully!');
+      fetchBlogs();
+    } catch (error) {
+      console.error('Error deleting blog:', error);
+      setError('Error deleting blog');
+    }
+  };
+
+  useEffect(() => {
+    fetchBlogs();
+  }, [fetchBlogs]);
+
   return (
-    <form onSubmit={handleSubmit}>
-      <input name="title" placeholder="Title" onChange={handleChange} />
-      <textarea name="content" placeholder="Content" onChange={handleChange}></textarea>
-      <button type="submit">Create Blog</button>
-    </form>
+    <div style={{ maxWidth: '600px', margin: '0 auto', textAlign: 'center', padding: '20px' }}>
+      <h2>Create a New Blog</h2>
+      <form onSubmit={handleSubmit}>
+        <input
+          name="title"
+          placeholder="Title"
+          value={form.title}
+          onChange={handleChange}
+          style={{ width: '100%', padding: '10px', margin: '10px 0' }}
+        />
+        <textarea
+          name="content"
+          placeholder="Content"
+          value={form.content}
+          onChange={handleChange}
+          style={{ width: '100%', padding: '10px', margin: '10px 0' }}
+        />
+        <button type="submit">Create Blog</button>
+      </form>
+
+      {error && <p style={{ color: 'red' }}>{error}</p>}
+
+      <h2>All Blogs</h2>
+      {blogs.length > 0 ? (
+        blogs.map((blog) => {
+          console.log(`Blog ID: ${blog.id}`);
+          return (
+            <div key={blog.id} style={{ border: '1px solid #ccc', margin: '10px 0', padding: '10px' }}>
+              <h3>{blog.title}</h3>
+              <p>{blog.content}</p>
+              <button
+                onClick={() => navigate(`/edit/${blog.id}`)}
+                style={{ marginRight: '10px', backgroundColor: '#007BFF', color: 'white', padding: '5px 10px' }}
+              >
+                Edit
+              </button>
+              <button
+                onClick={() => handleDelete(blog.id)}
+                style={{ backgroundColor: 'red', color: 'white', padding: '5px 10px' }}
+              >
+                Delete
+              </button>
+            </div>
+          );
+        })
+      ) : (
+        <p>No blogs yet.</p>
+      )}
+    </div>
   );
 }
 
