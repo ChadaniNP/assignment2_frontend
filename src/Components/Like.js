@@ -1,39 +1,65 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
-function LikeBlog({ id, initialLikes }) {
-  const [likes, setLikes] = useState(initialLikes);
-  const [isLiking, setIsLiking] = useState(false);
+function Like({ blogId }) {
+  const [likes, setLikes] = useState(0);
+  const [liked, setLiked] = useState(false);
+  const token = localStorage.getItem('token');
+
+  useEffect(() => {
+    const fetchBlogDetails = async () => {
+      try {
+        const res = await axios.get(`http://localhost:8000/api/blogs/${blogId}/`, {
+          headers: { Authorization: `Token ${token}` },
+        });
+
+        setLikes(res.data.likes || 0);
+        setLiked(res.data.liked_by_user || false);
+      } catch (error) {
+        console.error('Failed to fetch blog details:', error);
+      }
+    };
+
+    if (token) {
+      fetchBlogDetails();
+    }
+  }, [blogId, token]);
 
   const handleLike = async () => {
-    setIsLiking(true);
     try {
-      const res = await axios.post(
-        `https://assignment2-backend-nine.vercel.app/${id}/like/`,
+      await axios.post(
+        `http://localhost:8000/api/blogs/${blogId}/like/`,
         {},
         {
-          headers: {
-            Authorization: `Token ${localStorage.getItem('token')}`,
-          },
+          headers: { Authorization: `Token ${token}` },
         }
       );
-      setLikes(res.data.likes); // if backend returns updated likes count
-      // or: setLikes(prev => prev + 1);
+
+      // Toggle UI immediately
+      setLiked((prevLiked) => !prevLiked);
+      setLikes((prevLikes) => (liked ? prevLikes - 1 : prevLikes + 1));
     } catch (error) {
-      console.error(error);
-      alert('Failed to like the blog.');
-    } finally {
-      setIsLiking(false);
+      console.error('Error liking blog:', error);
     }
   };
 
   return (
-    <div>
-      <button onClick={handleLike} disabled={isLiking}>
-        👍 Like ({likes})
-      </button>
-    </div>
+    <button
+      onClick={handleLike}
+      style={{
+        backgroundColor: liked ? '#e63946' : '#adb5bd', // red if liked, grey otherwise
+        color: 'white',
+        padding: '8px 16px',
+        border: 'none',
+        borderRadius: '5px',
+        cursor: 'pointer',
+        marginTop: '10px',
+        transition: 'background-color 0.3s ease',
+      }}
+    >
+      {liked ? '🤍 Liked' : '❤️ Like'} ({likes})
+    </button>
   );
 }
 
-export default LikeBlog;
+export default Like;
