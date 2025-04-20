@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 
 function CreateBlog() {
@@ -7,19 +7,32 @@ function CreateBlog() {
     const [blogs, setBlogs] = useState([]);
 
     const token = localStorage.getItem('token');
+    console.log("Token at startup:", token);
 
     const handleChange = (e) => {
         setForm({ ...form, [e.target.name]: e.target.value });
     };
 
-    const fetchBlogs = async () => {
-        try {
-            const res = await axios.get('https://assignment2-backend-nine.vercel.app/api/blogs/');
-            setBlogs(res.data);
-        } catch (error) {
-            console.error('Error fetching blogs:', error);
-        }
-    };
+    const fetchBlogs = useCallback(async () => {
+    if (!token) {
+        setError("You need to be logged in to view blogs.");
+        return;
+    }
+
+    try {
+        const res = await axios.get('https://assignment2-backend-nine.vercel.app/api/blogs/', {
+            headers: {
+                'Authorization': `Token ${token}`
+            }
+        });
+        console.log('Fetched blogs:', res.data);  // Log the fetched blogs
+        setBlogs(res.data);
+    } catch (error) {
+        console.error('Error fetching blogs:', error);
+        setError('Error fetching blogs');
+    }
+}, [token]);
+
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -48,9 +61,34 @@ function CreateBlog() {
         }
     };
 
+   const handleDelete = async (id) => {
+    if (!token) {
+        setError("You need to be logged in to delete a blog.");
+        return;
+    }
+
+    console.log(`Deleting blog with ID: ${id}`);  // Log the ID
+    const deleteUrl = `https://assignment2-backend-nine.vercel.app/api/blogs/${id}/delete/`;  // Log the URL as well
+    console.log(`Delete URL: ${deleteUrl}`);
+    try {
+        const response = await axios.delete(deleteUrl, {
+            headers: {
+                'Authorization': `Token ${token}`
+            }
+        });
+        console.log('Delete Response:', response);
+        alert('Blog deleted successfully!');
+        fetchBlogs();  // Refresh the blog list
+    } catch (error) {
+        console.error('Error deleting blog:', error);
+        setError('Error deleting blog');
+    }
+};
+
     useEffect(() => {
-        fetchBlogs(); // load blogs on page load
-    }, []);
+        fetchBlogs();
+    }, [fetchBlogs]);
+
 
     return (
         <div style={{ maxWidth: '600px', margin: '0 auto', textAlign: 'center', padding: '20px' }}>
@@ -77,15 +115,25 @@ function CreateBlog() {
 
             <h2>All Blogs</h2>
             {blogs.length > 0 ? (
-                blogs.map((blog) => (
-                    <div key={blog.id} style={{ border: '1px solid #ccc', margin: '10px 0', padding: '10px' }}>
-                        <h3>{blog.title}</h3>
-                        <p>{blog.content}</p>
-                    </div>
-                ))
-            ) : (
-                <p>No blogs yet.</p>
-            )}
+    blogs.map((blog) => {
+        console.log(`Blog ID: ${blog.id}`);  // Log the ID for debugging
+        return (
+            <div key={blog.id} style={{ border: '1px solid #ccc', margin: '10px 0', padding: '10px' }}>
+                <h3>{blog.title}</h3>
+                <p>{blog.content}</p>
+                <button
+                    onClick={() => handleDelete(blog.id)}
+                    style={{ backgroundColor: 'red', color: 'white', padding: '5px 10px', marginTop: '10px' }}
+                >
+                    Delete
+                </button>
+            </div>
+        );
+    })
+) : (
+    <p>No blogs yet.</p>
+)}
+
         </div>
     );
 }
