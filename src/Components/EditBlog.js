@@ -19,7 +19,7 @@ function EditBlog() {
     const fetchBlog = async () => {
       try {
         // ✅ fetch the blog with the correct ID
-        const res = await axios.get(`http://localhost:8000/api/blogs/${id}/`, {
+        const res = await axios.get('https://assignment2-backend-nine.vercel.app/api/blogs/${id}/edit/`, {
           headers: { Authorization: `Token ${token}` }
         });
         setForm({ title: res.data.title, content: res.data.content }); // prefill form
