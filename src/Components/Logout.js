@@ -1,6 +1,6 @@
 import React from 'react';
 
-function Logout({ onLogout }) {
+function Logout({onLogout}) {
   const handleLogout = () => {
     localStorage.removeItem('token'); // Remove the token from localStorage
     onLogout(); // Call the parent onLogout function to update the state
@@ -8,7 +8,7 @@ function Logout({ onLogout }) {
   };
 
   return (
-    <button onClick={handleLogout}>Logout</button>
+      <button onClick={handleLogout}>Logout</button>
   );
 }
 
