@@ -18,8 +18,7 @@ function EditBlog() {
 
     const fetchBlog = async () => {
       try {
-        // ✅ fetch the blog with the correct ID
-        const res = await axios.get(`http://localhost:8000/api/blogs/${id}/`, {
+        const res = await axios.get(`https://assignment2-backend-nine.vercel.app/api/blogs/${id}/`, {
           headers: { Authorization: `Token ${token}` }
         });
         setForm({ title: res.data.title, content: res.data.content }); // prefill form
@@ -41,7 +40,7 @@ function EditBlog() {
 
     try {
       await axios.put(
-        `http://localhost:8000/api/blogs/${id}/edit/`,
+        `https://assignment2-backend-nine.vercel.app/api/blogs/${id}/edit/`,
         form,
         {
           headers: { Authorization: `Token ${token}` }

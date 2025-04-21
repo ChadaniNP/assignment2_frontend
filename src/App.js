@@ -2,7 +2,7 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 
 import CreateBlog from './Components/CreateBlog';
-import Edit from './Components/EditBlog';
+import EditBlog from './Components/EditBlog';
 import Delete from './Components/Delete';
 import Home from './Components/Home';
 import Login from './Components/Login';
@@ -40,7 +40,7 @@ function App() {
           path="/edit/:id"
           element={
             <PrivateRoute>
-              <Edit />
+              <EditBlog />
             </PrivateRoute>
           }
         />
